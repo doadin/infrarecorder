@@ -1657,7 +1657,7 @@ bool CProjectManager::LoadProject(const TCHAR *szFullPath)
     }
 
     // Try to expand the root item for data projects.
-    if (iType == PROJECTTYPE_DATA)
+    if (m_pTreeView != NULL && iType == PROJECTTYPE_DATA)
         m_pTreeView->Expand(g_TreeManager.GetRootNode()->m_hTreeItem);
 
     // Update the space meter.
