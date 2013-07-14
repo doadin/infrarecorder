@@ -2217,8 +2217,8 @@ bool CProjectManager::IsEmpty() const
  * @param [in] Transaction The transaction object to update with the new file.
  * @return If successful true is returned, if not false is returned.
  */
-bool CProjectManager::ImportFile(ckcore::Path &BasePath,
-                                 ckcore::tstring &FilePath,
+bool CProjectManager::ImportFile(const ckcore::Path &BasePath,
+                                 const ckcore::tstring &FilePath,
                                  CFileTransaction &Transaction)
 {
     // Check if full file path.
@@ -2231,6 +2231,9 @@ bool CProjectManager::ImportFile(ckcore::Path &BasePath,
     // Create full path from relative path.
     ckcore::Path FullPath = BasePath;
     FullPath += FilePath.c_str();
+
+    if (FullPath.name().size() >= MAX_PATH)
+        return false;
 
     return Transaction.AddFile(FullPath.name().c_str());
 }
@@ -2266,8 +2269,7 @@ bool CProjectManager::Import(const TCHAR *szFullPath)
         ckcore::LineReader<char> LineReader(FileStream);
         while (!LineReader.end())
         {
-            ckcore::tstring Line =
-                ckcore::string::ansi_to_auto<1024>(LineReader.read_line().c_str());
+            ckcore::tstring Line = ckcore::string::to_auto(LineReader.read_line());
 
             // Skip empty and commented lines.
             if (Line.empty())
@@ -2282,6 +2284,12 @@ bool CProjectManager::Import(const TCHAR *szFullPath)
 
             if (!ImportFile(BasePath,Line,Transaction))
             {
+                if (Line.size() >= 512)
+                {
+                    Line.resize(512);
+                    Line.append(ckT("..."));
+                }
+
                 TCHAR szBuffer[1024];
                 lsprintf(szBuffer,lngGetString(ERROR_PROJECT_IMPORT_FILE),
                     Line.c_str());
@@ -2296,8 +2304,7 @@ bool CProjectManager::Import(const TCHAR *szFullPath)
         ckcore::LineReader<wchar_t> LineReader(FileStream);
         while (!LineReader.end())
         {
-            ckcore::tstring Line =
-                ckcore::string::utf16_to_auto<1024>(LineReader.read_line().c_str());
+            ckcore::tstring Line = LineReader.read_line();
             
             // Skip empty and commented lines.
             if (Line.empty())

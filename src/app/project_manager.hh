@@ -147,8 +147,9 @@ private:
         AV_LIST
     };
 
-    bool ImportFile(ckcore::Path &BasePath,ckcore::tstring &FilePath,
-        CFileTransaction &Transaction);
+    bool ImportFile(const ckcore::Path &BasePath,
+                    const ckcore::tstring &FilePath,
+                    CFileTransaction &Transaction);
 
 public:
     CProjectManager();
